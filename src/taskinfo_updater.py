@@ -24,23 +24,27 @@ ti.AddTaskInfo(3,  task3.Info())
 taskinfo = copy.deepcopy(ti.all)
 
 # LogFiles
-TASK_URGENCY_LOG = "TaskUrgencyLog-" +\
-    time.strftime("%Y%b%H%M%S", time.gmtime()) + ".txt"
-TASK_WORKERS_LOG = "TaskWorkersLog-" +\
-    time.strftime("%Y%b%H%M%S", time.gmtime()) + ".txt"
+TASK_URGENCY_LOG = "UrgencyLog-" +\
+    time.strftime("%Y%b%d-%H%M%S", time.gmtime()) + ".txt"
+TASK_WORKERS_LOG = "WorkersLog-" +\
+    time.strftime("%Y%b%d-%H%M%S", time.gmtime()) + ".txt"
 urgency_log = ''
 workers_log = ''
+updater_step = 0
 
 def TimeStampLogMsg():
-    global   urgency_log,  workers_log
-    urgency_log = str(int(time.time()))
-    workers_log = str(int(time.time()))
+	global   urgency_log,  workers_log, updater_step
+	updater_step = updater_step + 1
+	urgency_log = time.strftime("%H:%M:%S", time.gmtime())\
+		+ "; " + str(updater_step)
+	workers_log = time.strftime("%H:%M:%S", time.gmtime())\
+		+ "; " + str(updater_step)
     
 def PrepareLogMsg(urgency,  workers):
     global   urgency_log,  workers_log
-    urg_msg = ";" + str(urgency) 
+    urg_msg = "; " + str(urgency) 
     urgency_log += urg_msg
-    workers_msg = ";" + str(workers)
+    workers_msg = "; " + str(workers)
     workers_log += workers_msg
 
 def GetTaskUrgency(taskid,  urg):
@@ -90,8 +94,8 @@ def UpdateTaskInfo():
 def InitLogFiles():
     f1 = open(TASK_URGENCY_LOG,  "w")
     f2 = open(TASK_WORKERS_LOG,  "w")
-    header = "TimeStamp"
-    for x in xrange(MAX_SHOPTASK+1):
+    header = "#Time(HH:MM:SS); Step#"
+    for x in xrange(1, MAX_SHOPTASK+1):
         header += "; "
         header += "Task"
         header += str(x)
