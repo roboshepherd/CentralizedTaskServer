@@ -22,14 +22,14 @@ class TaskInfoSignal(dbus.service.Object):
     def TaskInfo(self, sig,  taskinfo):
         # The signal is emitted when this method exits
         print "TaskInfo signal: %s  " % (sig)
-        print taskinfo
+        #print taskinfo
     def Exit(self):
 		global loop
 		loop.quit()
 
 #Emit DBus-Signal
 def emit_task_signal(sig1,  inc):
-        print "At emit_task_signal():"
+        #print "At emit_task_signal():"
         schedule.enter(inc, 0, emit_task_signal, (sig1,  inc)) # re-schedule to repeat this function
         global datamgr_proxy,  task_signal
         datamgr_proxy.mTaskInfoAvailable.wait()

@@ -9,18 +9,24 @@ from data_manager import *
 logging.config.fileConfig("logging.conf")
 logger = logging.getLogger("EpcLogger")
 
+ROBOTS_PATH_CFG_FILE = "robots_dbus_path.conf"
+
 def save_task_status(robotid,  taskid):
-    global datamgr_proxy
-    try:
-        datamgr_proxy.mTaskWorkers[taskid].append(robotid)
-        print datdatamgr_proxy.mTaskWorkers
-    except:
-       print "Err in save_task_status()"
+	global datamgr_proxy
+	print "Robot id %d" %robotid
+	try:
+		robotid = eval(str(robotid))
+		taskid = eval(str(taskid))
+		datamgr_proxy.mTaskWorkers[robotid] = taskid
+		print "Save Task Status:"
+		print datamgr_proxy.mTaskWorkers
+	except Exception, e:
+		print "Err in save_task_status():", e
 
 def robot_signal_handler(sig,  robotid,  taskid):
-    print "Caught signal  %s (in taskinfo signal handler) "  %(sig)
-    #print "Val: ",  val
-    save_task_status(robotid,  taskid)
+	print "Caught signal  %s (in robot signal handler) "  %(sig)
+	print "Robot: %i, engaged in %i" %(robotid, taskid)  
+	save_task_status(robotid,  taskid)
 
 def main_loop():
     try:
@@ -31,24 +37,28 @@ def main_loop():
         pass
         sys.exit(0)
 
-def receiver_main(data_mgr,  dbus_iface= DBUS_IFACE_EPUCK,\
-        dbus_path = DBUS_PATH_BASE,  robots=1, \
-        sig= SIG_TASK_STATUS,  delay=3):
-    global datamgr_proxy,  robot_signal
-    datamgr_proxy = data_mgr
-    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-    bus = dbus.SessionBus()
-    # prepare dbus_paths
-    print "Robot paths %i"  %robots
-    dbus_paths = []
-    for x in range(1, robots+1):
-        p = dbus_path + str(x)
-        dbus_paths.append(p)
-    try:
-        for x in range(robots):
-            bus.add_signal_receiver(robot_signal_handler, dbus_interface =\
-                                 dbus_iface, path= dbus_paths[x],  signal_name = sig)
-        main_loop()
-    except dbus.DBusException:
-        traceback.print_exc()
-        sys.exit(1)
+def listener_main(data_mgr,  dbus_iface= DBUS_IFACE_EPUCK,\
+        dbus_path = DBUS_PATH_BASE,  robots_cfg=ROBOTS_PATH_CFG_FILE, \
+        sig= SIG_TASK_STATUS,  delay=1):
+	global datamgr_proxy,  robot_signal
+	datamgr_proxy = data_mgr
+	print "@RecvrMain: Task workers"
+	print datamgr_proxy.mTaskWorkers
+	dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+	bus = dbus.SessionBus()
+	# prepare dbus_paths
+	#print "Robot paths %i"  %robots
+	dbus_paths = []
+	f = open(ROBOTS_PATH_CFG_FILE, 'r')
+	for line in f.readlines():
+		if(line[0] == '/'):
+			dbus_paths.append(line)
+	f.close()
+	try:
+		for p in dbus_paths:
+			bus.add_signal_receiver(robot_signal_handler, dbus_interface =\
+				dbus_iface, path= p,  signal_name = sig)
+		main_loop()
+	except dbus.DBusException:
+		traceback.print_exc()
+		sys.exit(1)

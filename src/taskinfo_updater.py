@@ -15,9 +15,9 @@ logger = logging.getLogger("EpcLogger")
 #  Setup Initial Task Info 
 # Fix: Change it to reading from a config file
 ti = TaskInfo()
-task1 = ShopTask(id=1,  x=900,  y=1100)
-task2 = ShopTask(id=2,  x=1500,  y=1200)
-task3 = ShopTask(id=3,  x=2500,  y=1800)
+task1 = ShopTask(id=1,  x=1507,  y=944)
+task2 = ShopTask(id=2,  x=2431,  y=2264)
+task3 = ShopTask(id=3,  x=1042,  y=1973)
 ti.AddTaskInfo(1,  task1.Info()) 
 ti.AddTaskInfo(2,  task2.Info())
 ti.AddTaskInfo(3,  task3.Info())
@@ -44,30 +44,48 @@ def PrepareLogMsg(urgency,  workers):
     workers_log += workers_msg
 
 def GetTaskUrgency(taskid,  urg):
-        global  datamgr_proxy
-        workers = len(datamgr_proxy.mTaskWorkers[taskid])
-        print "Task %d Workers:" %taskid
-        print  datamgr_proxy.mTaskWorkers[taskid]
-        if workers > 0:
-            urgency = urg - workers * DELTA_TASK_URGENCY 
-        else:
-            urgency = urg +  DELTA_TASK_URGENCY
-       # Save data into log
-        PrepareLogMsg(urgency,  workers)
-        return urgency
+	global  datamgr_proxy
+	urgency = urg
+	workers = 0
+	worker_list = []
+	try:
+		worker_dict = datamgr_proxy.mTaskWorkers
+		for k, v in worker_dict.items():
+			rid = eval(str(k))
+			tid = eval(str(v))
+			if(tid == taskid):
+				worker_list.append(rid)
+		print "Task %d Workers:" %taskid
+		print worker_list
+	except Exception, e:
+		print "@GetTaskUrgency(): worker count unavailable", e
+	workers= len(worker_list)
+	if workers > 0:
+		urgency = urg - workers * DELTA_TASK_URGENCY 
+	elif workers == 0:
+		urgency = urg +  DELTA_TASK_URGENCY
+	else:
+		print "worker count not updated"
+   # Save data into log
+	PrepareLogMsg(urgency,  workers)
+	print "task %d, urgency:%f" %(taskid, urgency)
+	return urgency
 
 def UpdateTaskInfo():
-        global  datamgr_proxy
-        #print "DMP ti2 %s" %id(datamgr_proxy.mTaskInfo)
-        # Put TimeStamp on logs
-        TimeStampLogMsg()
-        for taskid, ti  in  datamgr_proxy.mTaskInfo.items():
-            urg= ti[TASK_INFO_URGENCY] 
-            ti[TASK_INFO_URGENCY] =   GetTaskUrgency(taskid,  urg)
-            datamgr_proxy.mTaskInfo[taskid] = ti
-            #print task
-        datamgr_proxy.mTaskInfoAvailable.set() 
-        print "Updated ti %s" %datamgr_proxy.mTaskInfo
+	global  datamgr_proxy
+	#print "DMP ti2 %s" %id(datamgr_proxy.mTaskInfo)
+	# Put TimeStamp on logs
+	TimeStampLogMsg()
+	#try:
+	for taskid, ti  in  datamgr_proxy.mTaskInfo.items():
+		urg= ti[TASK_INFO_URGENCY] 
+		ti[TASK_INFO_URGENCY] =   GetTaskUrgency(taskid,  urg)
+		datamgr_proxy.mTaskInfo[taskid] = ti
+			#print task
+	#except Exception, e:
+		#print "Err @UpdateTaskInfo(): %s", e
+		datamgr_proxy.mTaskInfoAvailable.set()
+	#print "Updated ti %s" %datamgr_proxy.mTaskInfo
 
 def InitLogFiles():
     f1 = open(TASK_URGENCY_LOG,  "w")
@@ -106,7 +124,7 @@ def updater_main(datamgr):
     for k,  v in taskinfo.iteritems():
         datamgr_proxy.mTaskInfo[k] =v
         # simulating task worker signal recv.
-        datamgr_proxy.mTaskWorkers[k] = [random.randint(1, 8)] * (k - 1)
+        #datamgr_proxy.mTaskWorkers[k] = [random.randint(1, 8)] * (k - 1)
     print "@updater:"
     print datamgr_proxy.mTaskInfo
     datamgr_proxy.mTaskInfoAvailable.set()
@@ -114,4 +132,4 @@ def updater_main(datamgr):
         print "@updater:"
         UpdateTaskInfo()
         UpdateLogFiles()
-        time.sleep(2)
+        time.sleep(10)

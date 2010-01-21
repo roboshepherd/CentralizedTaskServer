@@ -20,7 +20,7 @@ def main():
         emitter.start()
         listener.start()
         # Ending....
-        time.sleep(10)
+        time.sleep(3)
         updater.join()
         emitter.join()
         listener.join()
@@ -31,15 +31,16 @@ if __name__ == '__main__':
     # arg parsing
     numargs = len(sys.argv) - 1
     if numargs > 1 or numargs < 1:
-        print "usage:" + sys.argv[0] + "<robot count >"
+        print "usage:" + sys.argv[0] + "<robot-path cfg_file>"
         sys.exit(1) 
     else:
-        robots = int(sys.argv[1])
+        robots_cfg = sys.argv[1]
     # init stuff
-    dm = DataManager()
+	dm = DataManager()
     sig1 = SIG_TASK_INFO
     sig2 = SIG_TASK_STATUS
     delay = 2 # interval between signals
+
     updater = multiprocessing.Process(\
         target=taskinfo_updater. updater_main,\
         name="TaskInfoUpdater",  args=(dm, ))
@@ -49,9 +50,9 @@ if __name__ == '__main__':
         args=(dm,  DBUS_IFACE_TASK_SERVER,\
         DBUS_PATH_TASK_SERVER, sig1,   delay,  ))
     listener = multiprocessing.Process(\
-        target=dbus_listener.receiver_main,\
+        target=dbus_listener.listener_main,\
         name="TaskStatusReceiver",\
-        args=(dm,  DBUS_IFACE_EPUCK, DBUS_PATH_BASE, robots,\
+        args=(dm,  DBUS_IFACE_EPUCK, DBUS_PATH_BASE, robots_cfg,\
             sig2,   delay))
     main()   
 

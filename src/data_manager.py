@@ -8,5 +8,5 @@ class DataManager:
         self.mTaskInfoAvailable = self.mgr.Event() 
         # set by taskinfo updater 
         self.mTaskWorkers = self.mgr.dict()  
-        # key:taskid v: robotid (s) list recvd. by dbus client 
+        # key:robotid v: taskid recvd. by dbus client 
 
