@@ -50,6 +50,11 @@ def PrepareLogMsg(urgency,  workers):
 
 def GetTaskUrgency(taskid,  urg):
 	global  datamgr_proxy
+	if urg > 1:
+		return 1
+	elif urg < 0:
+		return 0
+	# urgency 0~1
 	urgency = urg
 	workers = 0
 	worker_list = []
