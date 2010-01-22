@@ -39,7 +39,7 @@ if __name__ == '__main__':
 	dm = DataManager()
     sig1 = SIG_TASK_INFO
     sig2 = SIG_TASK_STATUS
-    delay = 2 # interval between signals
+    delay = TASK_INFO_EMIT_FREQ # interval between signals
 
     updater = multiprocessing.Process(\
         target=taskinfo_updater. updater_main,\

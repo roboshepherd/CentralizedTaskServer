@@ -3,6 +3,7 @@ import logging, logging.config
 import time
 import copy
 import random
+import sys
 
 from RILCommonModules.RILSetup import  *
 from RILCommonModules.task_info import *
@@ -120,20 +121,26 @@ def UpdateLogFiles():
     workers_log = ''
 
 def updater_main(datamgr):
-    InitLogFiles()
-    global datamgr_proxy,  taskurg
-    datamgr_proxy = datamgr
-    #print "DMP ti1 %s" %id(datamgr_proxy.mTaskInfo)
-    taskurg = INIT_TASK_URGENCY
-    for k,  v in taskinfo.iteritems():
-        datamgr_proxy.mTaskInfo[k] =v
-        # simulating task worker signal recv.
-        #datamgr_proxy.mTaskWorkers[k] = [random.randint(1, 8)] * (k - 1)
-    print "@updater:"
-    print datamgr_proxy.mTaskInfo
-    datamgr_proxy.mTaskInfoAvailable.set()
-    while True:
-        print "@updater:"
-        UpdateTaskInfo()
-        UpdateLogFiles()
-        time.sleep(10)
+	InitLogFiles()
+	global datamgr_proxy,  taskurg
+	datamgr_proxy = datamgr
+	#print "DMP ti1 %s" %id(datamgr_proxy.mTaskInfo)
+	taskurg = INIT_TASK_URGENCY
+	for k,  v in taskinfo.iteritems():
+		datamgr_proxy.mTaskInfo[k] =v
+		# simulating task worker signal recv.
+		#datamgr_proxy.mTaskWorkers[k] = [random.randint(1, 8)] * (k - 1)
+	print "@updater:"
+	print datamgr_proxy.mTaskInfo
+	datamgr_proxy.mTaskInfoAvailable.set()
+	try:
+		while True:
+			print "@updater:"
+			UpdateTaskInfo()
+			UpdateLogFiles()
+			time.sleep(TASK_INFO_UPDATE_FREQ)
+	except (KeyboardInterrupt, SystemExit):
+			print "User requested exit... TaskInfoUpdater shutting down now"
+			sys.exit(0)
+        
+

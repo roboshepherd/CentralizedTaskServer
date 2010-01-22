@@ -43,7 +43,7 @@ def emit_task_signal(sig1,  inc):
 
 def emitter_main(datamgr,  dbus_iface= DBUS_IFACE_TASK_SERVER,\
             dbus_path = DBUS_PATH_TASK_SERVER, \
-            sig1= SIG_TASK_INFO,  delay = 3):
+            sig1= SIG_TASK_INFO,  delay = TASK_INFO_EMIT_FREQ):
         global task_signal,  datamgr_proxy, loop
         datamgr_proxy = datamgr
         # proceed only after taskinfo is populated
