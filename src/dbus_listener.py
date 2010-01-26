@@ -51,6 +51,8 @@ def listener_main(data_mgr,  dbus_iface= DBUS_IFACE_EPUCK,\
 	dbus_paths = []
 	f = open(ROBOTS_PATH_CFG_FILE, 'r')
 	for line in f.readlines():
+		if line.endswith('\n'):
+		    line = line[:-1]
 		if(line[0] == '/'):
 			dbus_paths.append(line)
 	f.close()

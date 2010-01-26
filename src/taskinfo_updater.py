@@ -71,9 +71,9 @@ def GetTaskUrgency(taskid,  urg):
 		print "@GetTaskUrgency(): worker count unavailable", e
 	workers= len(worker_list)
 	if workers > 0:
-		urgency = urg - workers * DELTA_TASK_URGENCY 
+		urgency = urg - workers * DELTA_TASK_URGENCY_DEC
 	elif workers == 0:
-		urgency = urg +  DELTA_TASK_URGENCY
+		urgency = urg +  DELTA_TASK_URGENCY_INC
 	else:
 		print "worker count not updated"
    # Save data into log
