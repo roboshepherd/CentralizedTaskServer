@@ -7,9 +7,8 @@ import logging,  logging.config
 from RILCommonModules.RILSetup import *
 from RILCommonModules.task_info import *
 from RILCommonModules.pose import *
-from data_manager import *
+from CentralizedTaskServer.data_manager import *
 
-logging.config.fileConfig("logging.conf")
 logger = logging.getLogger("EpcLogger")
 
 schedule = sched.scheduler(time.time, time.sleep)

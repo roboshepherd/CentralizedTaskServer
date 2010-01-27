@@ -7,10 +7,8 @@ import sys
 
 from RILCommonModules.RILSetup import  *
 from RILCommonModules.task_info import *
-from data_manager import *
+from CentralizedTaskServer.data_manager import *
 
-logging.config.fileConfig("logging.conf")
-#create logger
 logger = logging.getLogger("EpcLogger")
 
 #  Setup Initial Task Info 
@@ -50,10 +48,6 @@ def PrepareLogMsg(urgency,  workers):
 
 def GetTaskUrgency(taskid,  urg):
 	global  datamgr_proxy
-	if urg > 1:
-		return 1
-	elif urg < 0:
-		return 0
 	# urgency 0~1
 	urgency = urg
 	workers = 0
@@ -65,20 +59,25 @@ def GetTaskUrgency(taskid,  urg):
 			tid = eval(str(v))
 			if(tid == taskid):
 				worker_list.append(rid)
-		print "Task %d Workers:" %taskid
+		logger.info("Task %d Workers searched", taskid)
+		print "Task %d Workers: %s" %taskid
 		print worker_list
 	except Exception, e:
-		print "@GetTaskUrgency(): worker count unavailable", e
+		logger.warn("@GetTaskUrgency(): worker count unavailable %s", e)
 	workers= len(worker_list)
 	if workers > 0:
 		urgency = urg - workers * DELTA_TASK_URGENCY_DEC
 	elif workers == 0:
 		urgency = urg +  DELTA_TASK_URGENCY_INC
 	else:
-		print "worker count not updated"
+		logger.warn("worker count not updated")
+	if urgency > 1:
+		urgency = 1
+	elif urgency < 0:
+		urgency = 0
    # Save data into log
 	PrepareLogMsg(urgency,  workers)
-	print "task %d, urgency:%f" %(taskid, urgency)
+	logger.info("task %d, urgency:%f", taskid, urgency)
 	return urgency
 
 def UpdateTaskInfo():

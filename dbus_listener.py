@@ -4,12 +4,11 @@ import multiprocessing
 import logging,  logging.config,  logging.handlers
 
 from RILCommonModules.RILSetup import *
-from data_manager import *
+from CentralizedTaskServer.data_manager import *
 
-logging.config.fileConfig("logging.conf")
 logger = logging.getLogger("EpcLogger")
 
-ROBOTS_PATH_CFG_FILE = "robots_dbus_path.conf"
+#ROBOTS_PATH_CFG_FILE = "robots_dbus_path.conf"
 
 def save_task_status(robotid,  taskid):
 	global datamgr_proxy
@@ -38,7 +37,7 @@ def main_loop():
         sys.exit(0)
 
 def listener_main(data_mgr,  dbus_iface= DBUS_IFACE_EPUCK,\
-        dbus_path = DBUS_PATH_BASE,  robots_cfg=ROBOTS_PATH_CFG_FILE, \
+        dbus_path = DBUS_PATH_BASE,  robots_cfg="", \
         sig= SIG_TASK_STATUS,  delay=1):
 	global datamgr_proxy,  robot_signal
 	datamgr_proxy = data_mgr
@@ -49,7 +48,7 @@ def listener_main(data_mgr,  dbus_iface= DBUS_IFACE_EPUCK,\
 	# prepare dbus_paths
 	#print "Robot paths %i"  %robots
 	dbus_paths = []
-	f = open(ROBOTS_PATH_CFG_FILE, 'r')
+	f = open(robots_cfg, 'r')
 	for line in f.readlines():
 		if line.endswith('\n'):
 		    line = line[:-1]
