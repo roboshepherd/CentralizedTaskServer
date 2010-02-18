@@ -14,12 +14,19 @@ logger = logging.getLogger("EpcLogger")
 #  Setup Initial Task Info 
 # Fix: Change it to reading from a config file
 ti = TaskInfo()
-task1 = ShopTask(id=1,  x=1507,  y=944)
-task2 = ShopTask(id=2,  x=2431,  y=2264)
-task3 = ShopTask(id=3,  x=1042,  y=1973)
+task1 = ShopTask(id=1,  x=950,  y=840)
+task2 = ShopTask(id=2,  x=1797,  y=713)
+task3 = ShopTask(id=3,  x=1848,  y=1713)
+task4 = ShopTask(id=4,  x=535,  y=1596)
+#task5 = ShopTask(id=5,  x=2431,  y=2264)
+#task6 = ShopTask(id=6,  x=1042,  y=1973)
 ti.AddTaskInfo(1,  task1.Info()) 
 ti.AddTaskInfo(2,  task2.Info())
 ti.AddTaskInfo(3,  task3.Info())
+ti.AddTaskInfo(4,  task4.Info()) 
+#ti.AddTaskInfo(5,  task5.Info())
+#ti.AddTaskInfo(6,  task6.Info())
+
 taskinfo = copy.deepcopy(ti.all)
 
 # LogFiles
@@ -99,7 +106,8 @@ def UpdateTaskInfo():
 def InitLogFiles():
     f1 = open(TASK_URGENCY_LOG,  "w")
     f2 = open(TASK_WORKERS_LOG,  "w")
-    header = "#Time(HH:MM:SS); Step#"
+    header = "##;##"
+    header += "Time(HH:MM:SS); Step#"
     for x in xrange(1, MAX_SHOPTASK+1):
         header += "; "
         header += "Task"
