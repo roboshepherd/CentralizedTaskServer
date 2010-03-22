@@ -8,5 +8,9 @@ class DataManager:
         self.mTaskInfoAvailable = self.mgr.Event() 
         # set by taskinfo updater 
         self.mTaskWorkers = self.mgr.dict()  
-        # key:robotid v: taskid recvd. by dbus client 
+        # key:robotid v: taskid recvd. by dbus client
+        ## Manage task server's task info updtater state 
+        #(pause/play style) by a dbus signal
+        self.mTaskUpdaterState =  self.mgr.dict() 
+        self.mTaskUpdaterStateUpdated = self.mgr.Event() 
 

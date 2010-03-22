@@ -4,8 +4,9 @@ import logging, logging.config, logging.handlers
 import time
 import sys
 
-logging.config.fileConfig("\
-/home/newport-ril/centralized-expt/CentralizedTaskServer/logging.conf")
+LOG_CFG_PATH = "./logging.conf"
+
+logging.config.fileConfig(LOG_CFG_PATH)
 logger = logging.getLogger("EpcLogger")
 multiprocessing.log_to_stderr(logging.DEBUG)
 
@@ -21,11 +22,16 @@ def main():
         emitter.start()
         listener.start()
         # Ending....
-        time.sleep(3)
-        updater.join()
-        emitter.join()
-        listener.join()
-        logging.debug("--- End EPC---")
+        try:
+            time.sleep(3)
+            updater.join()
+            emitter.join()
+            listener.join()
+        except (KeyboardInterrupt, SystemExit):
+            logging.debug("--- End EPC---")
+            print "User requested exit..TaskServer shutting down now"
+            logging.debug("--- End EPC---")                
+            sys.exit(0)
 
 
 if __name__ == '__main__':
@@ -37,7 +43,7 @@ if __name__ == '__main__':
     else:
         robots_cfg = sys.argv[1]
     # init stuff
-	dm = DataManager()
+    dm = DataManager()
     sig1 = SIG_TASK_INFO
     sig2 = SIG_TASK_STATUS
     delay = TASK_INFO_EMIT_FREQ # interval between signals
