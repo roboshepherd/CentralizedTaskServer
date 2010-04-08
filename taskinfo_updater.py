@@ -29,6 +29,43 @@ ti.AddTaskInfo(4,  task4.Info())
 
 taskinfo = copy.deepcopy(ti.all)
 
+# log robot workers status
+#---------------------Log recevd. signal/data  ---------------------
+class StatusLogger():
+    def __init__(self):
+        self.log_writer1 = None  # for logging recvd. pose signal      
+        self.step = 0
+
+    def InitLogFiles(self):
+        name = "TaskStatus"
+        now = time.strftime("%Y%b%d-%H%M%S", time.gmtime())
+        desc = "logged in centralized communication mode from: " + now
+        # prepare label
+        label = "TimeStamp;HH:MM:SS;StepCounter;TaskID;RobotCount;RobotList \n"
+        # Data context
+        ctx = DataCtx(name, label, desc)
+        # Signal Logger
+        self.log_writer1 = DataWriter("TaskStatus", ctx, now)
+
+    def _GetCommonHeader(self):
+        sep = DATA_SEP
+        ts = str(time.time()) + sep + time.strftime("%H:%M:%S", time.gmtime())
+        self.step = self.step + 1
+        header = ts + sep + str(self.step)
+        return header
+    
+    def AppendLog(self, taskid, robotlist):        
+        sep = DATA_SEP
+        len = len(robotlist)
+        robotlist.sort() 
+        log = self._GetCommonHeader()\
+         + sep + str(len) + sep + str(robotlist) + "\n"
+        try: 
+            self.log_writer1.AppendData(log)
+        except:
+            print "TaskStatus logging failed"
+
+
 # LogFiles
 TASK_URGENCY_LOG = "UrgencyLog-" +\
     time.strftime("%Y%b%d-%H%M%S", time.gmtime()) + ".txt"
@@ -56,7 +93,7 @@ def PrepareLogMsg(urgency,  workers):
     workers_log += workers_msg
 
 def GetTaskUrgency(taskid,  urg):
-    global  datamgr_proxy
+    global  datamgr_proxy, status_logger
     # urgency 0~1
     urgency = urg
     workers = 0
@@ -71,6 +108,7 @@ def GetTaskUrgency(taskid,  urg):
         logger.info("Task %d Workers searched", taskid)
         print "Task %d Workers: %s" %taskid
         print worker_list
+        status_logger.AppendLog(taskid, worker_list)
     except Exception, e:
         logger.warn("@GetTaskUrgency(): worker count unavailable %s", e)
     workers= len(worker_list)
@@ -137,12 +175,16 @@ def UpdateLogFiles():
 
 def updater_main(datamgr):
     InitLogFiles()
-    global datamgr_proxy,  taskurg
+    global datamgr_proxy,  taskurg, status_logger
     datamgr_proxy = datamgr
     #print "DMP ti1 %s" %id(datamgr_proxy.mTaskInfo)
     taskurg = INIT_TASK_URGENCY
     for k,  v in taskinfo.iteritems():
         datamgr_proxy.mTaskInfo[k] =v
+    # setup logging
+    status_logger = StatusLogger()
+    status_logger.InitLogFiles()
+    # real work starts
     print "@updater:"
     print datamgr_proxy.mTaskInfo
     datamgr_proxy.mTaskInfoAvailable.set()
