@@ -12,5 +12,6 @@ class DataManager:
         ## Manage task server's task info updtater state 
         #(pause/play style) by a dbus signal
         self.mTaskUpdaterState =  self.mgr.dict() 
-        self.mTaskUpdaterStateUpdated = self.mgr.Event() 
+        self.mTaskUpdaterStateUpdated = self.mgr.Event()
+        self.mTrackerAlive = self.mgr.Event() 
 

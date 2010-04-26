@@ -6,6 +6,7 @@ import random
 import sys
 
 from RILCommonModules.RILSetup import  *
+from RILCommonModules.LiveGraph import *
 from RILCommonModules.task_info import *
 from CentralizedTaskServer.data_manager import *
 
@@ -37,7 +38,7 @@ taskinfo = copy.deepcopy(ti.all)
 #---------------------Log recevd. signal/data  ---------------------
 class StatusLogger():
     def __init__(self):
-        self.log_writer1 = None  # for logging recvd. pose signal      
+        self.writer = None  # for logging recvd. pose signal      
         self.step = 0
 
     def InitLogFiles(self):
@@ -49,7 +50,7 @@ class StatusLogger():
         # Data context
         ctx = DataCtx(name, label, desc)
         # Signal Logger
-        self.log_writer1 = DataWriter("TaskStatus", ctx, now)
+        self.writer = DataWriter("TIUpdater", ctx, now)
 
     def _GetCommonHeader(self):
         sep = DATA_SEP
@@ -65,7 +66,7 @@ class StatusLogger():
         log = self._GetCommonHeader()\
          + sep + str(len) + sep + str(robotlist) + "\n"
         try: 
-            self.log_writer1.AppendData(log)
+            self.writer.AppendData(log)
         except:
             print "TaskStatus logging failed"
 
@@ -112,9 +113,9 @@ def GetTaskUrgency(taskid,  urg):
         logger.info("Task %d Workers searched", taskid)
         print "Task %d Workers: %s" %taskid
         print worker_list
-        status_logger.AppendLog(taskid, worker_list)
+        status_logger.writer.AppendLog(taskid, worker_list)
     except Exception, e:
-        logger.warn("@GetTaskUrgency(): worker count unavailable %s", e)
+        logger.warn("@GetTaskUrgency(): err %s", e)
     workers= len(worker_list)
     if workers > 0:
         urgency = urg - workers * DELTA_TASK_URGENCY_DEC
@@ -200,6 +201,7 @@ def updater_main(datamgr):
             state =  str(datamgr_proxy.mTaskUpdaterState[TASK_INFO_UPDTAER_STATE])
             datamgr_proxy.mTaskUpdaterStateUpdated.clear()
             print "@TaskInfoUpdater:"
+            datamgr_proxy.mTrackerAlive.wait()
             if state == TASK_INFO_UPDATER_RUN:            
                 UpdateTaskInfo()
                 UpdateLogFiles()

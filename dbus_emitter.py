@@ -29,7 +29,7 @@ class TaskInfoSignal(dbus.service.Object):
 #Emit DBus-Signal
 def emit_task_signal(sig1,  inc):
         #print "At emit_task_signal():"
-        schedule.enter(inc, 0, emit_task_signal, (sig1,  inc)) # re-schedule to repeat this function
+        schedule.enter(inc, 0, emit_task_signal, (sig1,  inc)) # re-schedule 
         global datamgr_proxy,  task_signal
         datamgr_proxy.mTaskInfoAvailable.wait()
         taskinfo = datamgr_proxy.mTaskInfo.copy() # use a soft copy

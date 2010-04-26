@@ -4,7 +4,7 @@ import logging, logging.config, logging.handlers
 import time
 import sys
 
-LOG_CFG_PATH = "./logging.conf"
+LOG_CFG_PATH = "/home/newport-ril/centralized-expt/EpuckCentralizedClient/logging.conf"
 
 logging.config.fileConfig(LOG_CFG_PATH)
 logger = logging.getLogger("EpcLogger")
@@ -14,6 +14,7 @@ from RILCommonModules.RILSetup import *
 from CentralizedTaskServer.data_manager import *
 from CentralizedTaskServer.dbus_emitter import *
 from CentralizedTaskServer.dbus_listener import *
+from CentralizedTaskServer.swistrack_monitor import *
 from CentralizedTaskServer.taskinfo_updater import *
 
 def main():
@@ -21,12 +22,14 @@ def main():
         updater .start()
         emitter.start()
         listener.start()
+        tracker_monitor.start()
         # Ending....
         try:
             time.sleep(3)
             updater.join()
             emitter.join()
             listener.join()
+            tracker_monitor.join()
         except (KeyboardInterrupt, SystemExit):
             logging.debug("--- End EPC---")
             print "User requested exit..TaskServer shutting down now"
@@ -61,6 +64,10 @@ if __name__ == '__main__':
         name="TaskStatusReceiver",\
         args=(dm,  DBUS_IFACE_EPUCK, DBUS_PATH_BASE, robots_cfg,\
             sig2,   delay))
+    tracker_monitor = multiprocessing.Process(\
+        target=monitor_main,\
+        name="SwisTrackMonitor",\
+        args=(dm, ))
     main()   
 
 

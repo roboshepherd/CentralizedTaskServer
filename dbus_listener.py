@@ -10,6 +10,16 @@ logger = logging.getLogger("EpcLogger")
 
 #ROBOTS_PATH_CFG_FILE = "robots_dbus_path.conf"
 
+def tracker_pose_signal_handler(x, y, theta):
+    global datamgr_proxy
+    print "New pose signal listened" 
+    try:
+        if (not datamgr_proxy.mTrackerAlive.is_set()):
+            datamgr_proxy.mTrackerAlive.set()
+        #print "@SwisTrack monitor: Alive"
+    except Exception, e:
+        print "Err in tracker_pose_signal_handler():", e
+
 def updater_interrupt_handler(state):
     global datamgr_proxy
     print "New server state requested %s" %(state)
@@ -73,7 +83,11 @@ def listener_main(data_mgr,  dbus_iface= DBUS_IFACE_EPUCK,\
         
         # catch interrupt signals for task info updater
         bus.add_signal_receiver(updater_interrupt_handler, dbus_interface =\
-                DBUS_IFACE_TASK_SERVER, path= DBUS_PATH_TASK_SERVER,  signal_name = SIG_TASK_INFO_UPDTAER )
+                DBUS_IFACE_TASK_SERVER, path= DBUS_PATH_TASK_SERVER,\
+                  signal_name = SIG_TASK_INFO_UPDTAER )
+        bus.add_signal_receiver(tracker_pose_signal_handler,\
+             dbus_interface = DBUS_IFACE_TRACKER,\
+             signal_name = SIG_ROBOT_POSE)
         main_loop()
     except dbus.DBusException:
         traceback.print_exc()
