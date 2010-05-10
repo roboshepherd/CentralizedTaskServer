@@ -15,22 +15,22 @@ logger = logging.getLogger("EpcLogger")
 #  Setup Initial Task Info 
 # Fix: Change it to reading from a config file
 ti = TaskInfo()
-task1 = ShopTask(id=1,  x=2032,  y=555)
-task2 = ShopTask(id=2,  x=2720,  y=877)
-task3 = ShopTask(id=3,  x=3502,  y=865)
-task4 = ShopTask(id=4,  x=3394,  y=1514)
-task5 = ShopTask(id=5,  x=2735,  y=1661)
-task6 = ShopTask(id=6,  x=2703,  y=2415)
-task7 = ShopTask(id=7,  x=1605,  y=1901)
-task8 = ShopTask(id=8,  x=1617,  y=1122)
+task1 = ShopTask(id=1,  x=1696,  y=1560)
+task2 = ShopTask(id=2,  x=2441,  y=1771)
+#task3 = ShopTask(id=3,  x=3502,  y=865)
+#task4 = ShopTask(id=4,  x=3394,  y=1514)
+#task5 = ShopTask(id=5,  x=2735,  y=1661)
+#task6 = ShopTask(id=6,  x=2703,  y=2415)
+#task7 = ShopTask(id=7,  x=1605,  y=1901)
+#task8 = ShopTask(id=8,  x=1617,  y=1122)
 ti.AddTaskInfo(1,  task1.Info()) 
 ti.AddTaskInfo(2,  task2.Info())
-ti.AddTaskInfo(3,  task3.Info())
-ti.AddTaskInfo(4,  task4.Info()) 
-ti.AddTaskInfo(5,  task5.Info())
-ti.AddTaskInfo(6,  task6.Info())
-ti.AddTaskInfo(7,  task7.Info())
-ti.AddTaskInfo(8,  task8.Info())
+#ti.AddTaskInfo(3,  task3.Info())
+#ti.AddTaskInfo(4,  task4.Info()) 
+#ti.AddTaskInfo(5,  task5.Info())
+#ti.AddTaskInfo(6,  task6.Info())
+#ti.AddTaskInfo(7,  task7.Info())
+#ti.AddTaskInfo(8,  task8.Info())
 
 taskinfo = copy.deepcopy(ti.all)
 
@@ -61,14 +61,15 @@ class StatusLogger():
     
     def AppendLog(self, taskid, robotlist):        
         sep = DATA_SEP
-        len = len(robotlist)
+        workers = len(robotlist)
         robotlist.sort() 
         log = self._GetCommonHeader()\
-         + sep + str(len) + sep + str(robotlist) + "\n"
+         + sep + str(workers) + sep + str(robotlist) + "\n"
         try: 
             self.writer.AppendData(log)
         except:
             print "TaskStatus logging failed"
+            logger.warn("TaskStatus logging failed")
 
 
 # LogFiles
@@ -103,17 +104,20 @@ def GetTaskUrgency(taskid,  urg):
     urgency = urg
     workers = 0
     worker_list = []
+    worker_dict = {}
     try:
         worker_dict = datamgr_proxy.mTaskWorkers
+        logger.info("Worker dict: %s", worker_dict)
         for k, v in worker_dict.items():
             rid = eval(str(k))
             tid = eval(str(v))
             if(tid == taskid):
                 worker_list.append(rid)
         logger.info("Task %d Workers searched", taskid)
-        print "Task %d Workers: %s" %taskid
+        print "Task %d Workers: %s" %(taskid, worker_list)
         print worker_list
-        status_logger.writer.AppendLog(taskid, worker_list)
+        logger.info("Task %d Workers worker_list: %s", taskid, worker_list)
+        status_logger.AppendLog(taskid, worker_list)
     except Exception, e:
         logger.warn("@GetTaskUrgency(): err %s", e)
     workers= len(worker_list)
@@ -152,7 +156,7 @@ def UpdateTaskInfo():
 def InitLogFiles():
     f1 = open(TASK_URGENCY_LOG,  "w")
     f2 = open(TASK_WORKERS_LOG,  "w")
-    header = "##;##"
+    header = "##;## \n"
     header += "Time; Time(HH:MM:SS); Step#"
     for x in xrange(1, MAX_SHOPTASK+1):
         header += "; "
@@ -201,7 +205,7 @@ def updater_main(datamgr):
             state =  str(datamgr_proxy.mTaskUpdaterState[TASK_INFO_UPDTAER_STATE])
             datamgr_proxy.mTaskUpdaterStateUpdated.clear()
             print "@TaskInfoUpdater:"
-            datamgr_proxy.mTrackerAlive.wait()
+            #datamgr_proxy.mTrackerAlive.wait()
             if state == TASK_INFO_UPDATER_RUN:            
                 UpdateTaskInfo()
                 UpdateLogFiles()

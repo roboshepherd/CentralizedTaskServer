@@ -2,6 +2,7 @@
 import time, os, sys, sched, subprocess, re, signal, traceback
 import multiprocessing
 import logging,  logging.config
+import pygame
 
 from RILCommonModules.RILSetup import *
 from CentralizedTaskServer.data_manager import *
@@ -10,16 +11,22 @@ logger = logging.getLogger("EpcLogger")
 
 schedule = sched.scheduler(time.time, time.sleep)
 
+SND_FILE = '/usr/share/sounds/ekiga/dialtone.wav'
 # beep
 def beep(duration):
     now = int(time.time())
     end = now + duration
     while now < end:
-        print "@Monitor now: ", now
-        sys.stdout.write('\a')
-        sys.stdout.flush()
+        log = "@Monitor beeping now: %s" %(str(now))
+        print log
+        logger.warn(log)
+        #sys.stdout.write('\a')
+        #sys.stdout.flush()
+        pygame.init()
+        pygame.mixer.Sound(SND_FILE).play()
         time.sleep(1)
         now = int(time.time())
+    logger.warn("End of beeping cycle")
 
 
 def monitor_pose_signal(delay, ):
