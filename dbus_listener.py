@@ -9,7 +9,6 @@ from CentralizedTaskServer.data_manager import *
 logger = logging.getLogger("EpcLogger")
 
 #ROBOTS_PATH_CFG_FILE = "robots_dbus_path.conf"
-
 def tracker_pose_signal_handler(x, y, theta):
     global datamgr_proxy
     print "New pose signal listened" 

@@ -16,7 +16,6 @@ from CentralizedTaskServer.dbus_emitter import *
 from CentralizedTaskServer.dbus_listener import *
 from CentralizedTaskServer.swistrack_monitor import *
 from CentralizedTaskServer.taskinfo_updater import *
-
 def main():
         logging.debug("--- Start EPC---")
         updater .start()
